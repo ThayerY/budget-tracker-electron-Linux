@@ -2,6 +2,7 @@
 const monthlyBudget = 150000;
 const dailyLimit = 5000;
 
+let day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 let currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 let dailySpent = 0;
 
@@ -186,7 +187,8 @@ async function handleEditDateTime(e) {
       const updatedItem = {
         ...item,
         date: newDate,
-        time: formatTime(new Date(`${newDate}T${newTime}`))
+        time: formatTime(new Date(`${newDate}T${newTime}`)),
+        day: getDayName(newDate)
       };
 
       try {
@@ -218,6 +220,7 @@ form.addEventListener('submit', async e => {
 
   const now = new Date();
   const time = formatTime(now);
+  // const day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
   if (dailySpent + itemPrice > dailyLimit) {
     const addToNextDay = confirm(
@@ -235,6 +238,7 @@ form.addEventListener('submit', async e => {
           price: itemPrice,
           date: nextDay,
           time,
+          day: getDayName(nextDay)
         };
 
         const response = await fetch('http://localhost:5000/items', {
@@ -268,6 +272,7 @@ form.addEventListener('submit', async e => {
       price: itemPrice,
       date: currentDate,
       time,
+      day: getDayName(currentDate)
     };
 
     const response = await fetch('http://localhost:5000/items', {
