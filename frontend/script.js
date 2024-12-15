@@ -86,8 +86,8 @@ function updateDisplay() {
 
   const remainingBudget = monthlyBudget - shoppingHistory.reduce((total, item) => total + item.price, 0);
 
-  monthlyBudgetEl.textContent = `$${remainingBudget}`;
-  dailyLimitEl.textContent = `$${dailyLimit - dailySpent}`;
+  monthlyBudgetEl.textContent = `$${remainingBudget.toLocaleString()}`;
+  dailyLimitEl.textContent = `$${(dailyLimit - dailySpent).toLocaleString()}`;
 
   renderHistory();
 }
@@ -109,7 +109,7 @@ function renderHistory() {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${item.name}</td>
-      <td>$${item.price}</td>
+      <td>$${item.price.toLocaleString()}</td>
       <td>${item.date}</td>
       <td>${formattedTime}</td>
       <td>${getDayName(item.date)}</td>
