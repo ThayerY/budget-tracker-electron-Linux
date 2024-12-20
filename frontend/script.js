@@ -5,11 +5,13 @@ const dailyLimit = 5000;
 let day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 let currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 let dailySpent = 0;
+let dailyTotal = 0;
 
 const form = document.getElementById('shopping-form');
 const historyTable = document.getElementById('history-table');
 const monthlyBudgetEl = document.getElementById('monthly-budget');
 const dailyLimitEl = document.getElementById('daily-limit');
+const dailyTotalEl = document.getElementById('daily-total');
 
 // Shopping history will be fetched from the database
 let shoppingHistory = [];
@@ -83,11 +85,14 @@ function updateDisplay() {
     .filter(item => item.date === currentDate)
     .reduce((total, item) => total + item.price, 0);
   dailySpent = spentToday;
+  dailyTotal = spentToday;
+  console.log(`this is for checking ${dailySpent}`)
 
   const remainingBudget = monthlyBudget - shoppingHistory.reduce((total, item) => total + item.price, 0);
 
   monthlyBudgetEl.textContent = `$${remainingBudget.toLocaleString()}`;
   dailyLimitEl.textContent = `$${(dailyLimit - dailySpent).toLocaleString()}`;
+  dailyTotalEl.textContent = `$${(dailyTotal).toLocaleString()}`;
 
   renderHistory();
 }
