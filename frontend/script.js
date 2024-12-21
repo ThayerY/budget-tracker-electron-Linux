@@ -2691,373 +2691,373 @@
 
 
 
-document.addEventListener('DOMContentLoaded', () => {
-  const dailyLimit = 25000;        // The five-day spending limit
-  const monthlyBudget = 150000;    // The monthly budget
-  let currentDate = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
-  let shoppingHistory = [];
+// document.addEventListener('DOMContentLoaded', () => {
+//   const dailyLimit = 25000;        // The five-day spending limit
+//   const monthlyBudget = 150000;    // The monthly budget
+//   let currentDate = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+//   let shoppingHistory = [];
 
-  // DOM Elements
-  const dailyLimitEl = document.getElementById('daily-limit');
-  const dailyTotalEl = document.getElementById('daily-total');
-  const monthlyBudgetEl = document.getElementById('monthly-budget');
-  const historyTable = document.getElementById('history-table');
-  const form = document.getElementById('shopping-form');
-  const dateSelector = document.getElementById('date-selector');
+//   // DOM Elements
+//   const dailyLimitEl = document.getElementById('daily-limit');
+//   const dailyTotalEl = document.getElementById('daily-total');
+//   const monthlyBudgetEl = document.getElementById('monthly-budget');
+//   const historyTable = document.getElementById('history-table');
+//   const form = document.getElementById('shopping-form');
+//   const dateSelector = document.getElementById('date-selector');
 
-  // ----------------------------------------------------------------------------
-  // 1) On page load, set the date selector to today's date
-  // ----------------------------------------------------------------------------
-  if (dateSelector) {
-    dateSelector.value = currentDate;
-    dateSelector.addEventListener('change', () => {
-      currentDate = dateSelector.value;
-      updateDisplay();
-    });
-  }
+//   // ----------------------------------------------------------------------------
+//   // 1) On page load, set the date selector to today's date
+//   // ----------------------------------------------------------------------------
+//   if (dateSelector) {
+//     dateSelector.value = currentDate;
+//     dateSelector.addEventListener('change', () => {
+//       currentDate = dateSelector.value;
+//       updateDisplay();
+//     });
+//   }
 
-  // ----------------------------------------------------------------------------
-  //                              Helper Functions
-  // ----------------------------------------------------------------------------
+//   // ----------------------------------------------------------------------------
+//   //                              Helper Functions
+//   // ----------------------------------------------------------------------------
 
-  // Convert a date string to the day name, e.g. "2024-12-01" -> "Sunday"
-  function getDayName(dateString) {
-    const dateObj = new Date(dateString);
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return days[dateObj.getDay()];
-  }
+//   // Convert a date string to the day name, e.g. "2024-12-01" -> "Sunday"
+//   function getDayName(dateString) {
+//     const dateObj = new Date(dateString);
+//     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+//     return days[dateObj.getDay()];
+//   }
 
-  // -- NEW HELPER (AM/PM conversion) -------------------------------------------
-  /**
-   * convertTo24Hour('10:05 AM') => '10:05'
-   * convertTo24Hour('9:40 PM')  => '21:40'
-   */
-  function convertTo24Hour(timeStr) {
-    // If it's already in HH:MM (24-hour) format, return as is
-    if (!timeStr.includes('AM') && !timeStr.includes('PM')) {
-      return timeStr;
-    }
-    let [time, modifier] = timeStr.split(' ');
-    let [hours, minutes] = time.split(':');
-    hours = parseInt(hours, 10);
+//   // -- NEW HELPER (AM/PM conversion) -------------------------------------------
+//   /**
+//    * convertTo24Hour('10:05 AM') => '10:05'
+//    * convertTo24Hour('9:40 PM')  => '21:40'
+//    */
+//   function convertTo24Hour(timeStr) {
+//     // If it's already in HH:MM (24-hour) format, return as is
+//     if (!timeStr.includes('AM') && !timeStr.includes('PM')) {
+//       return timeStr;
+//     }
+//     let [time, modifier] = timeStr.split(' ');
+//     let [hours, minutes] = time.split(':');
+//     hours = parseInt(hours, 10);
 
-    if (modifier === 'PM' && hours < 12) hours += 12;
-    if (modifier === 'AM' && hours === 12) hours = 0;
+//     if (modifier === 'PM' && hours < 12) hours += 12;
+//     if (modifier === 'AM' && hours === 12) hours = 0;
 
-    return `${hours.toString().padStart(2, '0')}:${minutes}`;
-  }
+//     return `${hours.toString().padStart(2, '0')}:${minutes}`;
+//   }
 
-  /**
-   * formatTo12Hour('10:05') => '10:05 AM'
-   * formatTo12Hour('21:05') => '9:05 PM'
-   */
-  function formatTo12Hour(timeStr) {
-    if (!timeStr) return '12:00 AM'; // fallback
-    let [hour, minute] = timeStr.split(':').map(Number);
-    const amPm = hour >= 12 ? 'PM' : 'AM';
-    hour = hour % 12 || 12;
-    return `${hour}:${minute.toString().padStart(2, '0')} ${amPm}`;
-  }
-  // ----------------------------------------------------------------------------
+//   /**
+//    * formatTo12Hour('10:05') => '10:05 AM'
+//    * formatTo12Hour('21:05') => '9:05 PM'
+//    */
+//   function formatTo12Hour(timeStr) {
+//     if (!timeStr) return '12:00 AM'; // fallback
+//     let [hour, minute] = timeStr.split(':').map(Number);
+//     const amPm = hour >= 12 ? 'PM' : 'AM';
+//     hour = hour % 12 || 12;
+//     return `${hour}:${minute.toString().padStart(2, '0')} ${amPm}`;
+//   }
+//   // ----------------------------------------------------------------------------
 
-  // Return the start of the current five-day cycle for a given Date
-  function getFiveDayCycleStart(date) {
-    // Start counting from Jan 1 of the same year
-    const startDate = new Date(date.getFullYear(), 0, 1);
-    const daysSinceStart = Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
-    const cycleStartDay = Math.floor(daysSinceStart / 5) * 5;
-    startDate.setDate(startDate.getDate() + cycleStartDay);
-    return startDate.toISOString().split('T')[0];
-  }
+//   // Return the start of the current five-day cycle for a given Date
+//   function getFiveDayCycleStart(date) {
+//     // Start counting from Jan 1 of the same year
+//     const startDate = new Date(date.getFullYear(), 0, 1);
+//     const daysSinceStart = Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
+//     const cycleStartDay = Math.floor(daysSinceStart / 5) * 5;
+//     startDate.setDate(startDate.getDate() + cycleStartDay);
+//     return startDate.toISOString().split('T')[0];
+//   }
 
-  // Return the end (inclusive) of the current five-day cycle
-  function getFiveDayCycleEnd(cycleStartDate) {
-    const endDate = new Date(cycleStartDate);
-    endDate.setDate(endDate.getDate() + 4);
-    return endDate.toISOString().split('T')[0];
-  }
+//   // Return the end (inclusive) of the current five-day cycle
+//   function getFiveDayCycleEnd(cycleStartDate) {
+//     const endDate = new Date(cycleStartDate);
+//     endDate.setDate(endDate.getDate() + 4);
+//     return endDate.toISOString().split('T')[0];
+//   }
 
-  // Calculate how much has been spent in the current month
-  function getMonthlySpent(shoppingHistory, dateStr) {
-    const dateObj = new Date(dateStr);
-    const currentYear = dateObj.getFullYear();
-    const currentMonth = dateObj.getMonth();
+//   // Calculate how much has been spent in the current month
+//   function getMonthlySpent(shoppingHistory, dateStr) {
+//     const dateObj = new Date(dateStr);
+//     const currentYear = dateObj.getFullYear();
+//     const currentMonth = dateObj.getMonth();
 
-    return shoppingHistory
-      .filter(item => {
-        const itemDate = new Date(item.date);
-        return (
-          itemDate.getFullYear() === currentYear &&
-          itemDate.getMonth() === currentMonth
-        );
-      })
-      .reduce((sum, item) => sum + item.price, 0);
-  }
+//     return shoppingHistory
+//       .filter(item => {
+//         const itemDate = new Date(item.date);
+//         return (
+//           itemDate.getFullYear() === currentYear &&
+//           itemDate.getMonth() === currentMonth
+//         );
+//       })
+//       .reduce((sum, item) => sum + item.price, 0);
+//   }
 
-  // ----------------------------------------------------------------------------
-  // 2) Main Update Display Function
-  // ----------------------------------------------------------------------------
-  function updateDisplay() {
-    const today = new Date(currentDate);
+//   // ----------------------------------------------------------------------------
+//   // 2) Main Update Display Function
+//   // ----------------------------------------------------------------------------
+//   function updateDisplay() {
+//     const today = new Date(currentDate);
 
-    // (a) Calculate monthly spending for the current month
-    const monthlySpentThisMonth = getMonthlySpent(shoppingHistory, currentDate);
-    const monthlyBudgetRemaining = monthlyBudget - monthlySpentThisMonth;
+//     // (a) Calculate monthly spending for the current month
+//     const monthlySpentThisMonth = getMonthlySpent(shoppingHistory, currentDate);
+//     const monthlyBudgetRemaining = monthlyBudget - monthlySpentThisMonth;
 
-    // (b) Five-day cycle logic
-    const cycleStartDate = getFiveDayCycleStart(today);
-    const cycleEndDate = getFiveDayCycleEnd(cycleStartDate);
+//     // (b) Five-day cycle logic
+//     const cycleStartDate = getFiveDayCycleStart(today);
+//     const cycleEndDate = getFiveDayCycleEnd(cycleStartDate);
 
-    // Sum everything spent in this 5-day window
-    const cycleSpending = shoppingHistory
-      .filter(item => item.date >= cycleStartDate && item.date <= cycleEndDate)
-      .reduce((sum, item) => sum + item.price, 0);
+//     // Sum everything spent in this 5-day window
+//     const cycleSpending = shoppingHistory
+//       .filter(item => item.date >= cycleStartDate && item.date <= cycleEndDate)
+//       .reduce((sum, item) => sum + item.price, 0);
 
-    // 'dailyTotal' is effectively the 5-day total
-    const dailyTotal = cycleSpending;
-    const fiveDayLimitRemaining = dailyLimit - dailyTotal;
+//     // 'dailyTotal' is effectively the 5-day total
+//     const dailyTotal = cycleSpending;
+//     const fiveDayLimitRemaining = dailyLimit - dailyTotal;
 
-    // (c) Update the UI
-    if (monthlyBudgetEl) {
-      monthlyBudgetEl.textContent = `$${monthlyBudgetRemaining.toLocaleString()}`;
-    }
-    if (dailyLimitEl) {
-      dailyLimitEl.textContent = `$${fiveDayLimitRemaining.toLocaleString()}`;
-    }
-    if (dailyTotalEl) {
-      dailyTotalEl.textContent = `$${dailyTotal.toLocaleString()}`;
-    }
+//     // (c) Update the UI
+//     if (monthlyBudgetEl) {
+//       monthlyBudgetEl.textContent = `$${monthlyBudgetRemaining.toLocaleString()}`;
+//     }
+//     if (dailyLimitEl) {
+//       dailyLimitEl.textContent = `$${fiveDayLimitRemaining.toLocaleString()}`;
+//     }
+//     if (dailyTotalEl) {
+//       dailyTotalEl.textContent = `$${dailyTotal.toLocaleString()}`;
+//     }
 
-    // (d) Disable the Add Item form if we've exceeded the five-day limit
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = (fiveDayLimitRemaining <= 0);
-    }
+//     // (d) Disable the Add Item form if we've exceeded the five-day limit
+//     const submitBtn = form.querySelector('button[type="submit"]');
+//     if (submitBtn) {
+//       submitBtn.disabled = (fiveDayLimitRemaining <= 0);
+//     }
 
-    // (e) Show only items that match the current date
-    renderHistory(shoppingHistory.filter(item => item.date === currentDate));
-  }
+//     // (e) Show only items that match the current date
+//     renderHistory(shoppingHistory.filter(item => item.date === currentDate));
+//   }
 
-  // ----------------------------------------------------------------------------
-  // 3) Render Table Rows For Current Date
-  // ----------------------------------------------------------------------------
-  function renderHistory(items) {
-    const tbody = historyTable.querySelector('tbody');
-    tbody.innerHTML = '';
+//   // ----------------------------------------------------------------------------
+//   // 3) Render Table Rows For Current Date
+//   // ----------------------------------------------------------------------------
+//   function renderHistory(items) {
+//     const tbody = historyTable.querySelector('tbody');
+//     tbody.innerHTML = '';
 
-    items.forEach(item => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${item.name}</td>
-        <td>$${item.price.toLocaleString()}</td>
-        <td>${item.date}</td>
-        <td>${item.time}</td>
-        <td>${item.day || 'No day provided'}</td>
-        <td>
-          <button class="edit-btn" data-id="${item._id}">Edit</button>
-          <button class="delete-btn" data-id="${item._id}">Delete</button>
-        </td>
-      `;
-      tbody.appendChild(row);
-    });
+//     items.forEach(item => {
+//       const row = document.createElement('tr');
+//       row.innerHTML = `
+//         <td>${item.name}</td>
+//         <td>$${item.price.toLocaleString()}</td>
+//         <td>${item.date}</td>
+//         <td>${item.time}</td>
+//         <td>${item.day || 'No day provided'}</td>
+//         <td>
+//           <button class="edit-btn" data-id="${item._id}">Edit</button>
+//           <button class="delete-btn" data-id="${item._id}">Delete</button>
+//         </td>
+//       `;
+//       tbody.appendChild(row);
+//     });
 
-    // Attach Edit / Delete handlers
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', handleEditItem);
-    });
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', handleDeleteItem);
-    });
-  }
+//     // Attach Edit / Delete handlers
+//     document.querySelectorAll('.edit-btn').forEach(btn => {
+//       btn.addEventListener('click', handleEditItem);
+//     });
+//     document.querySelectorAll('.delete-btn').forEach(btn => {
+//       btn.addEventListener('click', handleDeleteItem);
+//     });
+//   }
 
-  // ----------------------------------------------------------------------------
-  // 4) Delete Handler
-  // ----------------------------------------------------------------------------
-  async function handleDeleteItem(e) {
-    const itemId = e.target.dataset.id;
-    if (!itemId) {
-      console.error("No item ID found for deletion.");
-      return;
-    }
+//   // ----------------------------------------------------------------------------
+//   // 4) Delete Handler
+//   // ----------------------------------------------------------------------------
+//   async function handleDeleteItem(e) {
+//     const itemId = e.target.dataset.id;
+//     if (!itemId) {
+//       console.error("No item ID found for deletion.");
+//       return;
+//     }
 
-    const confirmDelete = confirm("Are you sure you want to delete this item?");
-    if (!confirmDelete) return;
+//     const confirmDelete = confirm("Are you sure you want to delete this item?");
+//     if (!confirmDelete) return;
 
-    try {
-      const response = await fetch(`http://localhost:5000/items/${itemId}`, {
-        method: 'DELETE'
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+//     try {
+//       const response = await fetch(`http://localhost:5000/items/${itemId}`, {
+//         method: 'DELETE'
+//       });
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
 
-      // Remove from local array
-      shoppingHistory = shoppingHistory.filter(item => item._id !== itemId);
-      updateDisplay();
-    } catch (error) {
-      console.error("Error deleting item:", error);
-      alert("Failed to delete item. Check console for details.");
-    }
-  }
+//       // Remove from local array
+//       shoppingHistory = shoppingHistory.filter(item => item._id !== itemId);
+//       updateDisplay();
+//     } catch (error) {
+//       console.error("Error deleting item:", error);
+//       alert("Failed to delete item. Check console for details.");
+//     }
+//   }
 
-  // ----------------------------------------------------------------------------
-  // 5) Edit Handler (Now with AM/PM conversion)
-  // ----------------------------------------------------------------------------
-  async function handleEditItem(e) {
-    const itemId = e.target.dataset.id;
-    const itemIndex = shoppingHistory.findIndex(it => it._id === itemId);
-    if (itemIndex === -1) return;
+//   // ----------------------------------------------------------------------------
+//   // 5) Edit Handler (Now with AM/PM conversion)
+//   // ----------------------------------------------------------------------------
+//   async function handleEditItem(e) {
+//     const itemId = e.target.dataset.id;
+//     const itemIndex = shoppingHistory.findIndex(it => it._id === itemId);
+//     if (itemIndex === -1) return;
 
-    const item = shoppingHistory[itemIndex];
-    const row = e.target.closest('tr');
-    if (!row) return;
+//     const item = shoppingHistory[itemIndex];
+//     const row = e.target.closest('tr');
+//     if (!row) return;
 
-    // We'll replace the date & time cells with input fields
-    const dateCell = row.children[2];
-    const timeCell = row.children[3];
-    const actionsCell = row.children[4];
+//     // We'll replace the date & time cells with input fields
+//     const dateCell = row.children[2];
+//     const timeCell = row.children[3];
+//     const actionsCell = row.children[4];
 
-    // Create input fields
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    dateInput.value = item.date;
+//     // Create input fields
+//     const dateInput = document.createElement('input');
+//     dateInput.type = 'date';
+//     dateInput.value = item.date;
 
-    // -- CHANGED: Convert item.time to 24-hour for the <input type="time">
-    const timeInput = document.createElement('input');
-    timeInput.type = 'time';
-    timeInput.value = convertTo24Hour(item.time);  // <--- Convert to HH:MM (24hr)
+//     // -- CHANGED: Convert item.time to 24-hour for the <input type="time">
+//     const timeInput = document.createElement('input');
+//     timeInput.type = 'time';
+//     timeInput.value = convertTo24Hour(item.time);  // <--- Convert to HH:MM (24hr)
 
-    // Clear existing cells and place inputs
-    dateCell.innerHTML = '';
-    timeCell.innerHTML = '';
-    dateCell.appendChild(dateInput);
-    timeCell.appendChild(timeInput);
+//     // Clear existing cells and place inputs
+//     dateCell.innerHTML = '';
+//     timeCell.innerHTML = '';
+//     dateCell.appendChild(dateInput);
+//     timeCell.appendChild(timeInput);
 
-    // Replace actions with a Save button
-    actionsCell.innerHTML = '';
-    const saveBtn = document.createElement('button');
-    saveBtn.textContent = 'Save';
-    actionsCell.appendChild(saveBtn);
+//     // Replace actions with a Save button
+//     actionsCell.innerHTML = '';
+//     const saveBtn = document.createElement('button');
+//     saveBtn.textContent = 'Save';
+//     actionsCell.appendChild(saveBtn);
 
-    // On Save
-    saveBtn.addEventListener('click', async () => {
-      const newDate = dateInput.value;
-      const newTime24 = timeInput.value; // e.g. "10:05"
-      if (!newDate || !newTime24) {
-        alert("Please enter both date and time.");
-        return;
-      }
+//     // On Save
+//     saveBtn.addEventListener('click', async () => {
+//       const newDate = dateInput.value;
+//       const newTime24 = timeInput.value; // e.g. "10:05"
+//       if (!newDate || !newTime24) {
+//         alert("Please enter both date and time.");
+//         return;
+//       }
 
-      // -- CHANGED: Convert back to AM/PM
-      const newTimeAMPM = formatTo12Hour(newTime24); // e.g. "10:05 AM"
-      const updatedItem = {
-        ...item,
-        date: newDate,
-        time: newTimeAMPM,           // <--- Store in AM/PM format
-        day: getDayName(newDate)
-      };
+//       // -- CHANGED: Convert back to AM/PM
+//       const newTimeAMPM = formatTo12Hour(newTime24); // e.g. "10:05 AM"
+//       const updatedItem = {
+//         ...item,
+//         date: newDate,
+//         time: newTimeAMPM,           // <--- Store in AM/PM format
+//         day: getDayName(newDate)
+//       };
 
-      try {
-        const response = await fetch(`http://localhost:5000/items/${itemId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedItem),
-        });
+//       try {
+//         const response = await fetch(`http://localhost:5000/items/${itemId}`, {
+//           method: 'PUT',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify(updatedItem),
+//         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! status: ${response.status}`);
+//         }
 
-        // Update local array
-        shoppingHistory[itemIndex] = updatedItem;
-        updateDisplay();
-      } catch (error) {
-        console.error("Error updating item:", error);
-        alert("Failed to update item.");
-      }
-    });
-  }
+//         // Update local array
+//         shoppingHistory[itemIndex] = updatedItem;
+//         updateDisplay();
+//       } catch (error) {
+//         console.error("Error updating item:", error);
+//         alert("Failed to update item.");
+//       }
+//     });
+//   }
 
-  // ----------------------------------------------------------------------------
-  // 6) Add New Item (Also in AM/PM format)
-  // ----------------------------------------------------------------------------
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    const itemName = document.getElementById('item-name').value.trim();
-    const itemPrice = parseFloat(document.getElementById('item-price').value);
+//   // ----------------------------------------------------------------------------
+//   // 6) Add New Item (Also in AM/PM format)
+//   // ----------------------------------------------------------------------------
+//   form.addEventListener('submit', async e => {
+//     e.preventDefault();
+//     const itemName = document.getElementById('item-name').value.trim();
+//     const itemPrice = parseFloat(document.getElementById('item-price').value);
 
-    if (!itemName || isNaN(itemPrice)) {
-      alert("Please enter a valid item name and price.");
-      return;
-    }
+//     if (!itemName || isNaN(itemPrice)) {
+//       alert("Please enter a valid item name and price.");
+//       return;
+//     }
 
-    // Check five-day cycle limit
-    const cycleStartDate = getFiveDayCycleStart(new Date(currentDate));
-    const cycleEndDate = getFiveDayCycleEnd(cycleStartDate);
-    const cycleSpending = shoppingHistory
-      .filter(item => item.date >= cycleStartDate && item.date <= cycleEndDate)
-      .reduce((sum, item) => sum + item.price, 0);
+//     // Check five-day cycle limit
+//     const cycleStartDate = getFiveDayCycleStart(new Date(currentDate));
+//     const cycleEndDate = getFiveDayCycleEnd(cycleStartDate);
+//     const cycleSpending = shoppingHistory
+//       .filter(item => item.date >= cycleStartDate && item.date <= cycleEndDate)
+//       .reduce((sum, item) => sum + item.price, 0);
 
-    if (cycleSpending + itemPrice > dailyLimit) {
-      alert("Five-day limit exceeded!");
-      return;
-    }
+//     if (cycleSpending + itemPrice > dailyLimit) {
+//       alert("Five-day limit exceeded!");
+//       return;
+//     }
 
-    // Build new item
-    const now = new Date();
-    // -- CHANGED: convert current time to AM/PM
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const time24 = `${hours}:${minutes}`;         // e.g. "08:05"
-    const timeAMPM = formatTo12Hour(time24);        // e.g. "8:05 AM"
+//     // Build new item
+//     const now = new Date();
+//     // -- CHANGED: convert current time to AM/PM
+//     const hours = now.getHours().toString().padStart(2, '0');
+//     const minutes = now.getMinutes().toString().padStart(2, '0');
+//     const time24 = `${hours}:${minutes}`;         // e.g. "08:05"
+//     const timeAMPM = formatTo12Hour(time24);        // e.g. "8:05 AM"
 
-    const newItem = {
-      name: itemName,
-      price: itemPrice,
-      date: currentDate,
-      time: timeAMPM,               // <--- Store in AM/PM
-      day: getDayName(currentDate)
-    };
+//     const newItem = {
+//       name: itemName,
+//       price: itemPrice,
+//       date: currentDate,
+//       time: timeAMPM,               // <--- Store in AM/PM
+//       day: getDayName(currentDate)
+//     };
 
-    try {
-      const response = await fetch('http://localhost:5000/items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newItem),
-      });
+//     try {
+//       const response = await fetch('http://localhost:5000/items', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(newItem),
+//       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
 
-      const addedItem = await response.json();
-      shoppingHistory.push(addedItem);
-      form.reset();
-      updateDisplay();
-    } catch (error) {
-      console.error("Error adding item:", error);
-      alert("Failed to add item. Check console for details.");
-    }
-  });
+//       const addedItem = await response.json();
+//       shoppingHistory.push(addedItem);
+//       form.reset();
+//       updateDisplay();
+//     } catch (error) {
+//       console.error("Error adding item:", error);
+//       alert("Failed to add item. Check console for details.");
+//     }
+//   });
 
-  // ----------------------------------------------------------------------------
-  // 7) Fetch Items Initially
-  // ----------------------------------------------------------------------------
-  async function fetchItems() {
-    try {
-      const response = await fetch('http://localhost:5000/items');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      shoppingHistory = await response.json();
-      console.log("Fetched items:", shoppingHistory);
-      updateDisplay();
-    } catch (error) {
-      console.error("Could not fetch items:", error);
-    }
-  }
+//   // ----------------------------------------------------------------------------
+//   // 7) Fetch Items Initially
+//   // ----------------------------------------------------------------------------
+//   async function fetchItems() {
+//     try {
+//       const response = await fetch('http://localhost:5000/items');
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
+//       shoppingHistory = await response.json();
+//       console.log("Fetched items:", shoppingHistory);
+//       updateDisplay();
+//     } catch (error) {
+//       console.error("Could not fetch items:", error);
+//     }
+//   }
 
-  // Start
-  fetchItems();
-});
+//   // Start
+//   fetchItems();
+// });
 

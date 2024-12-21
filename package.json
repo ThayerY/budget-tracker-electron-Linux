@@ -1,6 +1,7 @@
 {
   "name": "budget-tracker",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start-backend": "node backend/server.js",
     "start-frontend": "npx live-server frontend",
