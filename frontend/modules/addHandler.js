@@ -48,7 +48,7 @@ export async function handleAddItem(e) {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/items', {
+    const response = await fetch('http://localhost:5002/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newItem),

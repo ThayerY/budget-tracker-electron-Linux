@@ -9,7 +9,7 @@ import { updateDisplay } from './display.js';
 
 export async function fetchItems() {
   try {
-    const response = await fetch('http://localhost:5000/items');
+    const response = await fetch('http://localhost:5002/items');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

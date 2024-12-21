@@ -17,7 +17,7 @@ export async function handleDeleteItem(e) {
   if (!confirmDelete) return;
 
   try {
-    const response = await fetch(`http://localhost:5000/items/${itemId}`, {
+    const response = await fetch(`http://localhost:5002/items/${itemId}`, {
       method: 'DELETE'
     });
     if (!response.ok) {

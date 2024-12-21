@@ -62,7 +62,7 @@ export async function handleEditItem(e) {
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/items/${itemId}`, {
+      const response = await fetch(`http://localhost:5002/items/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedItem),
