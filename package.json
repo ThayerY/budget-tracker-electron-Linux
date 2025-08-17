@@ -4,8 +4,11 @@
   "type": "module",
   "scripts": {
     "start-backend": "node backend/server.js",
-    "start-frontend": "npx live-server frontend",
-    "start": "node backend/server.js"
+    "start-frontend": "npx live-server frontend --port=8080",
+    "start-bs": "node backend/server.js",
+    "start": "npx concurrently --kill-others --names \"Backend,Frontend\" --prefix-colors \"blue,green\" \"npm run start-backend\" \"sleep 3 && npm run start-frontend\"",
+    "wait-and-start-frontend": "npx wait-on http://localhost:5002 && npm run start-frontend",
+    "dev": "npx concurrently --kill-others --names \"Backend,Frontend\" --prefix-colors \"blue,green\" \"npm run start-backend\" \"npx wait-on http://localhost:5002 && npm run start-frontend\""
   },
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -15,6 +18,7 @@
     "mongoose": "^7.3.1"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "wait-on": "^8.0.4"
   }
 }
