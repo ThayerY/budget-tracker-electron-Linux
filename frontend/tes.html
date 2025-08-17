@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test 5-Day Cycle - CORRECTED</title>
+</head>
+<body>
+    <h2>5-Day Cycle Test - CORRECTED VERSION</h2>
+    <p>This should now show consecutive days in the same month grouped together</p>
+    <div id="results"></div>
+
+    <script>
+        // CORRECTED helper functions
+        function getFiveDayCycleStart(date) {
+            // Get the day of month (1-31)
+            const dayOfMonth = date.getDate();
+            
+            // Calculate which 5-day cycle this day belongs to within the month
+            // Days 1-5 = Cycle 0, Days 6-10 = Cycle 1, Days 11-15 = Cycle 2, etc.
+            const cycleNumber = Math.floor((dayOfMonth - 1) / 5);
+            const cycleStartDay = (cycleNumber * 5) + 1;
+            
+            // Create the start date of this cycle
+            const cycleStartDate = new Date(date.getFullYear(), date.getMonth(), cycleStartDay);
+            return cycleStartDate.toISOString().split('T')[0];
+        }
+
+        function getFiveDayCycleEnd(cycleStartDate) {
+            const startDate = new Date(cycleStartDate + 'T00:00:00');
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 4);
+            return endDate.toISOString().split('T')[0];
+        }
+
+        // Test different dates
+        const testDates = [
+            '2025-08-01', // Should be cycle 1-5
+            '2025-08-02', // Should be cycle 1-5
+            '2025-08-03', // Should be cycle 1-5
+            '2025-08-04', // Should be cycle 1-5
+            '2025-08-05', // Should be cycle 1-5
+            '2025-08-06', // Should be cycle 6-10
+            '2025-08-07', // Should be cycle 6-10
+            '2025-08-11', // Should be cycle 11-15
+            '2025-08-15', // Should be cycle 11-15
+            '2025-08-16', // Should be cycle 16-20
+            '2025-08-17', // Should be cycle 16-20
+            '2025-08-18', // Should be cycle 16-20
+            '2025-08-19', // Should be cycle 16-20
+            '2025-08-20', // Should be cycle 16-20
+            '2025-08-21', // Should be cycle 21-25
+            '2025-08-22', // Should be cycle 21-25
+        ];
+
+        let results = '<table border="1" style="border-collapse: collapse;">';
+        results += '<tr style="background: #ddd;"><th>Date</th><th>Day of Month</th><th>Cycle Start</th><th>Cycle End</th><th>Should Be Same?</th></tr>';
+
+        testDates.forEach((dateStr, index) => {
+            const date = new Date(dateStr + 'T00:00:00');
+            const dayOfMonth = date.getDate();
+            
+            const cycleStart = getFiveDayCycleStart(date);
+            const cycleEnd = getFiveDayCycleEnd(cycleStart);
+            
+            // Determine expected cycle
+            let expectedCycle = '';
+            let sameAsNext = '';
+            
+            if (dayOfMonth >= 1 && dayOfMonth <= 5) expectedCycle = '1-5';
+            else if (dayOfMonth >= 6 && dayOfMonth <= 10) expectedCycle = '6-10';
+            else if (dayOfMonth >= 11 && dayOfMonth <= 15) expectedCycle = '11-15';
+            else if (dayOfMonth >= 16 && dayOfMonth <= 20) expectedCycle = '16-20';
+            else if (dayOfMonth >= 21 && dayOfMonth <= 25) expectedCycle = '21-25';
+            else if (dayOfMonth >= 26 && dayOfMonth <= 31) expectedCycle = '26-31';
+            
+            // Check if this should be same as previous
+            if (index > 0) {
+                const prevDate = new Date(testDates[index-1] + 'T00:00:00');
+                const prevCycleStart = getFiveDayCycleStart(prevDate);
+                sameAsNext = (cycleStart === prevCycleStart) ? '✓ Same cycle' : '✗ Different cycle';
+            }
+            
+            const rowColor = cycleStart === cycleEnd ? '#ffcccc' : '#ccffcc';
+            
+            results += `<tr style="background: ${rowColor}">
+                <td style="padding: 5px;">${dateStr}</td>
+                <td style="padding: 5px;">${dayOfMonth}</td>
+                <td style="padding: 5px;">${cycleStart}</td>
+                <td style="padding: 5px;">${cycleEnd}</td>
+                <td style="padding: 5px;">${expectedCycle} ${sameAsNext}</td>
+            </tr>`;
+        });
+
+        results += '</table>';
+        results += '<p><strong>Expected Results:</strong></p>';
+        results += '<ul>';
+        results += '<li>Days 16, 17, 18, 19, 20 should all have the same Cycle Start and Cycle End</li>';
+        results += '<li>Day 21 should start a new cycle</li>';
+        results += '</ul>';
+        
+        document.getElementById('results').innerHTML = results;
+    </script>
+</body>
+</html>
