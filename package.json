@@ -2,13 +2,51 @@
   "name": "budget-tracker",
   "version": "1.0.0",
   "type": "module",
+  "main": "electron/main.js",
+  "homepage": "./",
   "scripts": {
     "start-backend": "node backend/server.js",
-    "start-frontend": "npx live-server frontend --port=8080",
-    "start-bs": "node backend/server.js",
-    "start": "npx concurrently --kill-others --names \"Backend,Frontend\" --prefix-colors \"blue,green\" \"npm run start-backend\" \"sleep 3 && npm run start-frontend\"",
-    "wait-and-start-frontend": "npx wait-on http://localhost:5002 && npm run start-frontend",
-    "dev": "npx concurrently --kill-others --names \"Backend,Frontend\" --prefix-colors \"blue,green\" \"npm run start-backend\" \"npx wait-on http://localhost:5002 && npm run start-frontend\""
+    "start-frontend": "npx live-server frontend --port=8080 --no-browser",
+    "start-web": "npx concurrently --kill-others --names \"Backend,Frontend\" --prefix-colors \"blue,green\" \"npm run start-backend\" \"sleep 3 && npm run start-frontend\"",
+    "electron": "electron .",
+    "electron-dev": "npx concurrently --kill-others --names \"Backend,Frontend,Electron\" --prefix-colors \"blue,green,yellow\" \"npm run start-backend\" \"sleep 3 && npm run start-frontend\" \"sleep 5 && electron .\"",
+    "start": "npm run electron-dev",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.yourname.budget-tracker",
+    "productName": "Budget Tracker",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/",
+      "frontend/",
+      "backend/",
+      "node_modules/",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/",
+        "to": "backend/"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "electron/icons/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "electron/icons/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "electron/icons/icon.png"
+    }
   },
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -19,6 +57,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
+    "electron": "^32.3.3",
+    "electron-builder": "^25.1.8",
     "wait-on": "^8.0.4"
   }
 }
