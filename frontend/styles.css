@@ -121,3 +121,51 @@ transition: background-color 0.3s ease;
 .popup-close-btn:hover {
 background-color: #c82333;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Your existing styles.css already has great popup styling! */
+/* Just add these additional improvements to complement your existing styles: */
+
+/* Button disabled state - add this to your existing styles */
+button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #6c757d;
+}
+
+button[type="submit"]:disabled:hover {
+    background-color: #6c757d;
+}
+
+/* Date selector styling to match your theme */
+#date-selector {
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Make budget values more prominent */
+#monthly-budget,
+#daily-limit,
+#daily-total {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Label styling for date selector */
+label[for="date-selector"] {
+    color: white;
+    font-weight: bold;
+}
