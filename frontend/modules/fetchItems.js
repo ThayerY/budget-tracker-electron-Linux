@@ -27,38 +27,3 @@ export async function fetchItems() {
 
 
 
-
-
-//---------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------
-
-
-
-
-
-// // modules/fetchItems.js
-// // -----------------------------------------------------------------------------
-// import { shoppingHistory } from './state.js';
-// import { updateDisplay } from './display.js';
-
-// export async function fetchItems() {
-//     try {
-//         const res = await fetch('http://localhost:5002/items');
-//         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-//         const data = await res.json();
-
-//         // Ensure prices are numbers
-//         shoppingHistory.length = 0;
-//         shoppingHistory.push(...data.map(it => ({
-//             ...it,
-//             price: parseFloat(it.price)
-//         })));
-
-//         console.log("Fetched items:", shoppingHistory);
-
-//         updateDisplay();
-//     } catch (err) {
-//         console.error("Could not fetch items:", err);
-//     }
-// }
